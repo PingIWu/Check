@@ -1,0 +1,4 @@
+file	mzp	ma0	LHAID	tanBeta	process
+lhafile	600.0	300.0	315200.0	1.0	 p p > Zp > h A0, A0 > n1 n1~
+cards	1400.0	400.0	315200.0	1.0	 p p > Zp > h A0, A0 > n1 n1~
+false
