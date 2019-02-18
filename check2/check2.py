@@ -24,7 +24,7 @@ class GetValue():
         self.ID = []
 
 hAList = []
-hApath = '/Volumes/FAT/lhe_files/job*.lhe'
+hApath = '/Users/Mac/job/LHE/Z*.lhe'
 #'/Volumes/FAT/lhe_files/job*.lhe'
 #'/Users/Mac/job/LHE/Z*.lhe'
 #path of LHE files
@@ -40,9 +40,9 @@ max=315300 #max
 #-----------------------------------------
 
 def getFile(fileName):
-    num = str(fileName).split('_')[5] #MZp
-    num2 = str(fileName).split('_')[6] #MA0
-    num3 = str(fileName).split('/')[4] #filename
+    num = str(fileName).split('_')[3] #MZp
+    num2 = str(fileName).split('_')[4] #MA0
+    num3 = str(fileName).split('/')[5] #filename
     #3/4/5 for original testing files
     #5/6/4 for real files
     global s
