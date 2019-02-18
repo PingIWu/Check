@@ -21,24 +21,30 @@ class GetValue():
         self.tanbeta = []
         self.gz = []
         self.pdf = []
+        self.ID = []
 
 hAList = []
-hApath = '/Users/Mac/job/LHE/Z*.lhe'
-#path of lhefiles
+hApath = '/Volumes/FAT/lhe_files/job*.lhe'
+#'/Volumes/FAT/lhe_files/job*.lhe'
+#'/Users/Mac/job/LHE/Z*.lhe'
+#path of LHE files
 hA_files = glob.glob(hApath)
-
+n=str(hA_files).count('lhe') #count the amount of the files ----------have error
+print(str(hA_files).count('lhe'))
 #----------------Settings-----------------
 lhaid=315200.0
 tanbeta=1.0
 gz=0.8
+min=315200 #min value of PDFID
+max=315300 #max
 #-----------------------------------------
 
-ID=[]
-
 def getFile(fileName):
-    num = str(fileName).split('_')[3] #[]is the nth object between 2_
-    num2 = str(fileName).split('_')[4]
-    num3 = str(fileName).split('_')[3]
+    num = str(fileName).split('_')[5] #MZp
+    num2 = str(fileName).split('_')[6] #MA0
+    num3 = str(fileName).split('/')[4] #filename
+    #3/4/5 for original testing files
+    #5/6/4 for real files
     global s
     s = GetValue()
     s.lhename = num3
@@ -80,6 +86,7 @@ def gethAList(lhefile):
         s = getFile(name)
         try:
             with open(name) as f:
+                s.ID=[]
                 for lheFile in f:
                     if lheFile.find('mzp') > 0 and lheFile.find('32') > 0:
                         s.mzp = float(getMZpValue(lheFile))
@@ -96,8 +103,9 @@ def gethAList(lhefile):
                     elif lheFile.find('weight') > 0 and lheFile.find('PDF') > 0 and lheFile.find('Member') > 0 :
                         s.pdf = int(getPDF(lheFile))
                         if s.pdf > 315199 and s.pdf < 315301 :
-                            ID.append(s.pdf)
+                            s.ID.append(s.pdf)
                     if  lheFile.find('totfact') > 0: break
+                #print(s.ID)
                 hAList.append(s)
         except IOError as exc:
             if exc.errno != errno.EISDIR:
@@ -106,51 +114,78 @@ def gethAList(lhefile):
 
 def main():
     hAList = gethAList(hA_files)
-    #hAList2 = gethAList2(hA_files2)
     textLine = []
     compare = [0,0,0,0,0,0,0]
     title=["file","mzp","ma0","LHAID","tanBeta","gz","process"]
-    for a in hAList:
-        #compare[0] = "lhefile"
-        MZp=int(a.fileNum)
-        MA0=int(a.fileNum2)
-        Name=a.lhename
-        print(a.pdf)   #PDF
-        if (int(a.mzp) != 0):
-            compare[1] = a.mzp
-            #print(a.mzp)
-        if (int(a.ma0) != 0):
-            compare[2] = a.ma0
-            #print(a.ma0)
-        if (int(a.lhaid) != 0):
-            compare[3] = a.lhaid
-            #print(a.lhaid)
-        if (int(a.tanbeta) != 0):
-            compare[4] = a.tanbeta
-        if (int(a.tanbeta) != 0):
-            compare[5] = a.gz
-        if (a.gener != 0):
-            compare[6] = a.gener
-        if (int(compare[1])==MZp and int(compare[2])!=0 and int(compare[3])==lhaid and int(compare[4])==tanbeta and compare[5]==gz and compare[6]!=0):
+    with open("LHEcheck.txt", "w") as g:
+        for a in hAList:
+            MZp=int(a.fileNum)
+            MA0=int(a.fileNum2)
+            Name=a.lhename
+            PDF=1
             
-            #print(MA0,int(compare[2]))
-            #print(a.mzp, a.ma0, a.lhaid, a.tanbeta, a.gz)
-            #print(a.gener)
-            compare = [Name, a.mzp, a.ma0, a.lhaid, a.tanbeta, a.gz, a.gener]
-            print(123)
-            textLine.append(["true"])
-        
-        else :
-            print(456)
-            print(a.mzp2, a.ma02, a.lhaid2, a.tanbeta2, a.gz2)
-            compare = [Name, a.mzp, a.ma0, a.lhaid, a.tanbeta, a.gz, a.gener]
-            textLine.append(["false"])
+            for i in range(min,max):
+                if (a.ID.count(i)<1):
+                    PDF=2
 
-    with open("LHEcheck.txt", "w") as f:
-        wr = csv.writer(f,delimiter="\t")
-        wr.writerow(title)
-        wr.writerow(compare)
-        wr.writerows(textLine)
+            if (int(a.mzp) != 0):
+                compare[1] = a.mzp
+            if (int(a.ma0) != 0):
+                compare[2] = a.ma0
+            if (int(a.lhaid) != 0):
+                compare[3] = a.lhaid
+            if (int(a.tanbeta) != 0):
+                compare[4] = a.tanbeta
+            if (int(a.tanbeta) != 0):
+                compare[5] = a.gz
+            if (a.gener != 0):
+                compare[6] = a.gener
+            if (int(compare[1])==MZp and int(compare[2])!=0 and int(compare[3])==lhaid and int(compare[4])==tanbeta and compare[5]==gz and compare[6]!=0 and PDF==1):
+            
+                compare = [Name, a.mzp, a.ma0, a.lhaid, a.tanbeta, a.gz, a.gener]
+                print(123)
+                textLine.append(["true"])
+                '''#-------Also write on txt if true-------
+                ZpMass=str(a.mzp)
+                A0Mass=str(a.ma0)
+                I=str(a.lhaid)
+                TB=str(a.tanbeta)
+                GZ=str(a.gz)
+                Gen=str(a.gener)
+                g.writelines(['File:',Name,'\n'])
+                g.writelines(['MZp:',ZpMass,'\n'])
+                g.writelines(['MA0:',A0Mass,'\n'])
+                g.writelines(['LHAID:',I,'\n'])
+                g.writelines(['tb:',TB,'\n'])
+                g.writelines(['gz:',GZ,'\n'])
+                g.writelines(['process:',Gen,'\n'])
+                '''
+                g.writelines(['true','\n'])
+                g.writelines(['\n'])
+            
+            else :
+                print(456)
+                textLine.append(["false"])
+                compare = [Name, a.mzp, a.ma0, a.lhaid, a.tanbeta, a.gz, a.gener]
+                ZpMass=str(a.mzp)
+                A0Mass=str(a.ma0)
+                I=str(a.lhaid)
+                TB=str(a.tanbeta)
+                GZ=str(a.gz)
+                Gen=str(a.gener)
+                g.writelines(['false','\n'])
+                g.writelines(['File:',Name,'\n'])
+                g.writelines(['MZp from file name: ',str(MZp),'; MZp in the file: ',ZpMass,'\n'])
+                g.writelines(['MA0 from file name: ',str(MA0),'; MA0 in the file: ',A0Mass,'\n'])
+                g.writelines(['LHAID: ',str(lhaid),'; LHAID in the file: ',I,'\n'])
+                g.writelines(['tb: ',str(tanbeta),'; tb in the file: ',TB,'\n'])
+                g.writelines(['gz: ',str(gz),'; gz in the file: ',GZ,'\n'])
+                g.writelines(['process: ',Gen,'\n'])
+                g.writelines(['Missing PDFIDs: '])
+                for i in range(min,max):
+                    if (a.ID.count(i)<1):
+                        g.writelines([str(i),'; '])
+                g.writelines(['\n','\n'])
 
 if __name__ == "__main__":
     main()
